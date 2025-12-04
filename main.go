@@ -1,31 +1,28 @@
 package main
 
-import "unicode"
+func calcDifferenceOfSquares(num int) int {
+	sum := 0
+	squareOfTheSum := 0
+	sumOfTheSquares := 0
 
-func checkIsogram(str string) bool {
-	letters := make(map[rune]bool)
-
-	for _, char := range str {
-		char = unicode.ToLower(char)
-
-		if !unicode.IsLetter(char) {
+	for i := range num + 1 {
+		if i == 0 {
 			continue
 		}
 
-		if letters[char] {
-			return false
-		}
-
-		letters[char] = true
+		sum += i
+		sumOfTheSquares += i * i
 	}
 
-	return true
+	squareOfTheSum = sum * sum
+
+	return squareOfTheSum - sumOfTheSquares
 }
 
 func main() {
-	testcases := [5]string{"lumberjacks", "background", "downstream", "six-year-old", "lululu"}
+	testcases := [4]int{10, 4, 14, 40}
 
 	for i := range len(testcases) {
-		println(checkIsogram(testcases[i]))
+		println(calcDifferenceOfSquares(testcases[i]))
 	}
 }
