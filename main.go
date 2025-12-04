@@ -1,25 +1,34 @@
 package main
 
-func calculateHammingDistance(seq1, seq2 string) int {
-	if len(seq1) != len(seq2) {
-		return 0
+import "strconv"
+
+func makeRaindropSound(number int) string {
+	result := ""
+
+	if number%3 == 0 {
+		result += "Pling"
 	}
 
-	result := 0
+	if number%5 == 0 {
+		result += "Plang"
+	}
 
-	for idx := range len(seq1) {
-		if seq1[idx] != seq2[idx] {
-			result++
-		}
+	if number%7 == 0 {
+		result += "Plong"
+	}
 
+	if result == "" {
+		result += strconv.Itoa(number)
 	}
 
 	return result
 }
 
 func main() {
-	strand1 := "GAGCCTACTAACGGGAT"
-	strand2 := "CATCGTAATGACGGCCT"
+	testCases := [4]int{28, 30, 34, 40}
 
-	println(calculateHammingDistance(strand1, strand2))
+	for i := range len(testCases) {
+		println(makeRaindropSound(testCases[i]))
+	}
+
 }
