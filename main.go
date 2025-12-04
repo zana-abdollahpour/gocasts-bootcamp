@@ -1,44 +1,44 @@
 package main
 
-import "strings"
+import "fmt"
 
-func checkValidityViaLuhn(word string) bool {
-	num := strings.ReplaceAll(word, " ", "")
+type Clock struct {
+	hours   int
+	minutes int
+}
 
-	if len(num) <= 1 {
-		return false
+func NewClock(h, m int) Clock {
+	minutes := m % 60
+
+	if minutes < 0 {
+		minutes += 60
+		h--
 	}
 
-	lastIndex := len(num) - 1
-	sum := 0
+	hours := (h + (m / 60)) % 24
 
-	for i, val := range num {
-		// Check if character is a digit
-		if val < '0' || val > '9' {
-			return false
-		}
-
-		// Convert rune to actual digit value
-		digit := int(val - '0')
-
-		// Double every second digit from the right
-		if (lastIndex-i)%2 != 0 {
-			digit *= 2
-			if digit > 9 {
-				digit -= 9
-			}
-		}
-
-		sum += digit
+	if hours < 0 {
+		hours += 24
 	}
 
-	return sum%10 == 0
+	return Clock{
+		hours,
+		minutes,
+	}
+}
+
+func (c Clock) Add(m int) Clock {
+	return NewClock(c.hours, (c.minutes + m))
+}
+
+func (c Clock) Subtract(m int) Clock {
+	return NewClock(c.hours, (c.minutes - m))
+}
+
+func (c Clock) String() string {
+	return fmt.Sprintf("%.2d:%.2d", c.hours, c.minutes)
 }
 
 func main() {
-	testcases := [4]string{"4539 3195 0343 6467", "066 123 478"}
-
-	for i := range len(testcases) {
-		println(checkValidityViaLuhn(testcases[i]))
-	}
+	fmt.Println(NewClock(4, 44))
 }
