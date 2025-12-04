@@ -1,22 +1,25 @@
 package main
 
-import "fmt"
-
-func determineName(name string) string {
-	if name == "" {
-		return "you"
+func calculateHammingDistance(seq1, seq2 string) int {
+	if len(seq1) != len(seq2) {
+		return 0
 	}
-	return name
-}
 
-func shutout(name string) {
-	fmt.Printf("one for %s, one for me\n", determineName(name))
+	result := 0
+
+	for idx := range len(seq1) {
+		if seq1[idx] != seq2[idx] {
+			result++
+		}
+
+	}
+
+	return result
 }
 
 func main() {
-	names := [4]string{"James", "Abraham", "", "Monica"}
+	strand1 := "GAGCCTACTAACGGGAT"
+	strand2 := "CATCGTAATGACGGCCT"
 
-	for _, name := range names {
-		shutout(name)
-	}
+	println(calculateHammingDistance(strand1, strand2))
 }
