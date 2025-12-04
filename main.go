@@ -1,34 +1,31 @@
 package main
 
-import "strconv"
+import "unicode"
 
-func makeRaindropSound(number int) string {
-	result := ""
+func checkIsogram(str string) bool {
+	letters := make(map[rune]bool)
 
-	if number%3 == 0 {
-		result += "Pling"
+	for _, char := range str {
+		char = unicode.ToLower(char)
+
+		if !unicode.IsLetter(char) {
+			continue
+		}
+
+		if letters[char] {
+			return false
+		}
+
+		letters[char] = true
 	}
 
-	if number%5 == 0 {
-		result += "Plang"
-	}
-
-	if number%7 == 0 {
-		result += "Plong"
-	}
-
-	if result == "" {
-		result += strconv.Itoa(number)
-	}
-
-	return result
+	return true
 }
 
 func main() {
-	testCases := [4]int{28, 30, 34, 40}
+	testcases := [5]string{"lumberjacks", "background", "downstream", "six-year-old", "lululu"}
 
-	for i := range len(testCases) {
-		println(makeRaindropSound(testCases[i]))
+	for i := range len(testcases) {
+		println(checkIsogram(testcases[i]))
 	}
-
 }
