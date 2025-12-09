@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type User struct {
@@ -31,6 +32,10 @@ type Category struct {
 	UserID int
 }
 
+const (
+	userStoragePath = "user.txt"
+)
+
 var userStorage []User
 var taskStorage []Task
 var categoryStorage []Category
@@ -38,6 +43,8 @@ var categoryStorage []Category
 var authenticatedUser *User
 
 func main() {
+	loadUserStorageFromFile()
+
 	fmt.Println("Hello, welcome to TODO app!")
 
 	command := flag.String("command", "no command", " command to run")
@@ -178,12 +185,11 @@ func registerUser() {
 	userStorage = append(userStorage, user)
 
 	const (
-		path       = "user.txt"
 		flag       = os.O_APPEND | os.O_CREATE | os.O_WRONLY
 		permission = os.FileMode(0644)
 	)
 
-	file, openErr := os.OpenFile(path, flag, permission)
+	file, openErr := os.OpenFile(userStoragePath, flag, permission)
 
 	if openErr != nil {
 		fmt.Printf("can't access or open the file %v\n", openErr)
@@ -239,4 +245,61 @@ func listTasks() {
 			fmt.Println(task)
 		}
 	}
+}
+
+func loadUserStorageFromFile() {
+	file, err := os.Open(userStoragePath)
+
+	if err != nil {
+		fmt.Println("Can't open the file", err)
+	}
+
+	var data = make([]byte, 1024)
+	_, openError := file.Read(data)
+
+	if openError != nil {
+		fmt.Println("Can't read from the file", openError)
+	}
+
+	dataString := string(data)
+	dataString = strings.Trim(dataString, "\n")
+
+	usersSlice := strings.SplitSeq(dataString, "\n")
+
+	for userData := range usersSlice {
+		userFields := strings.SplitSeq(userData, ",")
+
+		user := User{}
+		for userField := range userFields {
+			keyValuePair := strings.Split(userField, ": ")
+
+			if len(keyValuePair) != 2 {
+				continue
+			}
+
+			fieldName := strings.Trim(keyValuePair[0], " ")
+			fieldValue := strings.Trim(keyValuePair[1], " ")
+
+			switch fieldName {
+			case "id":
+				id, err := strconv.Atoi(fieldValue)
+				if err != nil {
+					fmt.Println("strconv.Atoi error", err)
+
+					return
+				}
+				user.ID = id
+
+			case "name":
+				user.Name = fieldValue
+			case "email":
+				user.Email = fieldValue
+			case "password":
+				user.Password = fieldValue
+
+			}
+		}
+
+	}
+
 }
