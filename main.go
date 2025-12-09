@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 type User struct {
@@ -15,16 +16,24 @@ type User struct {
 }
 
 type Task struct {
-	ID       int
-	Title    string
-	DueDate  string
-	category string
-	IsDone   bool
-	UserID   int
+	ID         int
+	Title      string
+	DueDate    string
+	categoryID int
+	IsDone     bool
+	UserID     int
+}
+
+type Category struct {
+	ID     int
+	Title  string
+	Color  string
+	UserID int
 }
 
 var userStorage []User
 var taskStorage []Task
+var categoryStorage []Category
 
 var authenticatedUser *User
 
@@ -38,7 +47,7 @@ func main() {
 		runCommand(*command)
 
 		scanner := bufio.NewScanner(os.Stdin)
-		fmt.Println("Please enter another command:")
+		fmt.Println("=> Please enter another command:")
 		scanner.Scan()
 		*command = scanner.Text()
 	}
@@ -73,27 +82,50 @@ func runCommand(command string) {
 
 func createTask() {
 	scanner := bufio.NewScanner(os.Stdin)
-	var title, category, duedate string
+	var title, categoryID, duedate string
 
 	fmt.Println("Please enter the task's title:")
 	scanner.Scan()
 	title = scanner.Text()
 
-	fmt.Println("Please enter the task's category:")
+	fmt.Println("Please enter the task's category id:")
 	scanner.Scan()
-	category = scanner.Text()
+	categoryID = scanner.Text()
 
 	fmt.Println("Please enter the task's duedate:")
 	scanner.Scan()
 	duedate = scanner.Text()
 
+	parsedCategoryID, err := strconv.Atoi(categoryID)
+
+	isFound := false
+	for _, c := range categoryStorage {
+		if c.ID == parsedCategoryID && c.UserID == authenticatedUser.ID {
+			isFound = true
+
+			break
+		}
+	}
+
+	if !isFound {
+		fmt.Println("category id is not found.")
+
+		return
+	}
+
+	if err != nil {
+		fmt.Printf("category id is not a valid integer, %v\n", err)
+
+		return
+	}
+
 	task := Task{
-		ID:       (len(taskStorage) + 1),
-		category: category,
-		Title:    title,
-		DueDate:  duedate,
-		IsDone:   false,
-		UserID:   authenticatedUser.ID,
+		ID:         (len(taskStorage) + 1),
+		categoryID: parsedCategoryID,
+		Title:      title,
+		DueDate:    duedate,
+		IsDone:     false,
+		UserID:     authenticatedUser.ID,
 	}
 
 	taskStorage = append(taskStorage, task)
@@ -112,7 +144,14 @@ func createCategory() {
 	scanner.Scan()
 	color = scanner.Text()
 
-	fmt.Println("Category:", title, color)
+	category := Category{
+		ID:     len(categoryStorage) + 1,
+		Title:  title,
+		Color:  color,
+		UserID: authenticatedUser.ID,
+	}
+
+	categoryStorage = append(categoryStorage, category)
 }
 
 func registerUser() {
