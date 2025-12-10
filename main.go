@@ -184,33 +184,8 @@ func registerUser() {
 	user := User{ID: id, Name: name, Email: email, Password: password}
 	userStorage = append(userStorage, user)
 
-	const (
-		flag       = os.O_APPEND | os.O_CREATE | os.O_WRONLY
-		permission = os.FileMode(0644)
-	)
+	writeToFile(user)
 
-	file, openErr := os.OpenFile(userStoragePath, flag, permission)
-
-	if openErr != nil {
-		fmt.Printf("can't access or open the file %v\n", openErr)
-
-		return
-	}
-
-	userData := fmt.Sprintf(
-		"id: %d, name: %s, email: %s, password: %s\n",
-		user.ID, user.Name, user.Email, user.Password,
-	)
-
-	_, writeError := file.Write([]byte(userData))
-
-	if writeError != nil {
-		fmt.Printf("can't write to the file %v\n", writeError)
-	}
-
-	file.Close()
-
-	fmt.Println("User created successfully!")
 }
 
 func login() {
@@ -302,4 +277,34 @@ func loadUserStorageFromFile() {
 
 	}
 
+}
+
+func writeToFile(user User) {
+	const (
+		flag       = os.O_APPEND | os.O_CREATE | os.O_WRONLY
+		permission = os.FileMode(0644)
+	)
+
+	file, openErr := os.OpenFile(userStoragePath, flag, permission)
+
+	if openErr != nil {
+		fmt.Printf("can't access or open the file %v\n", openErr)
+
+		return
+	}
+
+	defer file.Close()
+
+	userData := fmt.Sprintf(
+		"id: %d, name: %s, email: %s, password: %s\n",
+		user.ID, user.Name, user.Email, user.Password,
+	)
+
+	_, writeError := file.Write([]byte(userData))
+
+	if writeError != nil {
+		fmt.Printf("can't write to the file %v\n", writeError)
+	}
+
+	fmt.Println("User created successfully!")
 }
