@@ -51,6 +51,10 @@ var (
 	serializationMode string
 )
 
+var userFileStore = fileStore{
+	filePath: userStoragePath,
+}
+
 func main() {
 	fmt.Println("Hello, welcome to TODO app!")
 
@@ -64,11 +68,7 @@ func main() {
 
 	}
 
-	userReadFileStore := fileStore{
-		filePath: "./store/data.txt",
-	}
-
-	loadUserFromStorage(userReadFileStore, serializationMode)
+	loadUserFromStorage(userFileStore, serializationMode)
 
 	command := flag.String("command", "no command", " command to run")
 	flag.Parse()
@@ -92,19 +92,13 @@ func runCommand(command string) {
 		}
 	}
 
-	var userFileStore = fileStore{
-		filePath: "./store/user.txt",
-	}
-
-	var store userWriteStore = userFileStore
-
 	switch command {
 	case "create-task":
 		createTask()
 	case "create-category":
 		createCategory()
 	case "register-user":
-		registerUser(store)
+		registerUser(userFileStore)
 	case "login":
 		login()
 	case "list-tasks":
@@ -316,13 +310,13 @@ type fileStore struct {
 	filePath string
 }
 
-func (s fileStore) Save(user User) {
+func (f fileStore) Save(user User) {
 	const (
 		flag       = os.O_APPEND | os.O_CREATE | os.O_WRONLY
 		permission = os.FileMode(0644)
 	)
 
-	file, openErr := os.OpenFile(userStoragePath, flag, permission)
+	file, openErr := os.OpenFile(f.filePath, flag, permission)
 
 	if openErr != nil {
 		fmt.Printf("can't access or open the file %v\n", openErr)
@@ -365,10 +359,10 @@ func (s fileStore) Save(user User) {
 	fmt.Println("User created successfully!")
 }
 
-func (s fileStore) Load(serializationMode string) []User {
+func (f fileStore) Load(serializationMode string) []User {
 	var uStore []User
 
-	file, err := os.Open(userStoragePath)
+	file, err := os.Open(f.filePath)
 
 	if err != nil {
 		fmt.Println("Can't open the file", err)
